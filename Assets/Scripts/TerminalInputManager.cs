@@ -5,25 +5,24 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class TerminalInputManager : MonoBehaviour, IHoldHandler
-{
-
-    private TerminalButton[] _terminalButtons;
-    private UR5Controller _robotController;
-    private float _timer = 0.0f;
-    public float _forwardAngle = 0.0f;
-    private float _maxUpwardAngle = 0.0f;
+{   
+	public float _RobotMovementSpeedModifier = 0.25f;
+    public float[] _maxUpwardAngle = { 0.0f, 0.0f };
     public float[] _maxDownwardAngles = { -90.0f, 160.0f, 180.0f };
     public float[] _maxForwardAngles = { 0.0f, 90.0f, 0.0f };
     public float[] _maxReverseAngles = { 0.0f, -90.0f, 0.0f };
     public float[] _maxLeftAngles = { 90.0f, -90.0f, 0.0f };
-    public float[] _maxRightAngles = { 90.0f, 90.0f, 0.0f };
-    public float _RobotMovementSpeedModifier = 0.25f;
+    public float[] _maxRightAngles = { 90.0f, 90.0f, 0.0f };   
+	
     private bool _upButtonIsPressed = false;
     private bool _downButtonIsPressed = false;
     private bool _forwardButtonIsPressed = false;
     private bool _reverseButtonIsPressed = false;
     private bool _leftButtonIsPressed = false;
     private bool _rightButtonIsPressed = false;
+	private TerminalButton[] _terminalButtons;
+    private UR5Controller _robotController;
+	private float _timer = 0.0f;
 
     public bool UpButtonIsPressed {
         get {
@@ -106,27 +105,27 @@ public class TerminalInputManager : MonoBehaviour, IHoldHandler
 	void Update () {
 		if(UpButtonIsPressed)
         {
-            MoveArmUpdwards();
+            MoveArm(_maxUpwardAngle, 1, 2);
         }
         else if (DownButtonIsPressed)
         {
-            MoveArmDownWards();
+            MoveArm(_maxDownwardAngles, 1, 2);
         }
         else if (ForwardButtonIsPressed)
         {
-            MoveArmForward();
+            MoveArm(_maxForwardAngles, 0, 2);
         }
         else if (ReverseButtonIsPressed)
         {
-            MoveArmBackwards();
+            MoveArm(_maxReverseAngles, 0, 2);
         }
         else if (LeftButtonIsPressed)
         {
-            MoveArmLeft();
+            MoveArm(_maxLeftAngles, 0, 2);
         }
         else if (RightButtonIsPressed)
         {
-            MoveArmRight();
+            MoveArm(_maxRightAngles, 0, 2);
         }
         else
         {
@@ -134,84 +133,6 @@ public class TerminalInputManager : MonoBehaviour, IHoldHandler
         }
 
 	}
-
-    private void MoveArmRight()
-    {
-        float joint0 = _robotController.jointValues[0];
-        float joint1 = _robotController.jointValues[1];
-        float joint2 = _robotController.jointValues[2];
-
-        _robotController.jointValues[0] = Mathf.Lerp(joint0, _maxRightAngles[0], _timer);
-        _robotController.jointValues[1] = Mathf.Lerp(joint1, _maxRightAngles[1], _timer);
-        _robotController.jointValues[2] = Mathf.Lerp(joint2, _maxRightAngles[2], _timer);
-
-        _timer += _RobotMovementSpeedModifier * Time.deltaTime;
-    }
-
-    private void MoveArmLeft()
-    {
-        float joint0 = _robotController.jointValues[0];
-        float joint1 = _robotController.jointValues[1];
-        float joint2 = _robotController.jointValues[2];
-
-        _robotController.jointValues[0] = Mathf.Lerp(joint0, _maxLeftAngles[0], _timer);
-        _robotController.jointValues[1] = Mathf.Lerp(joint1, _maxLeftAngles[1], _timer);
-        _robotController.jointValues[2] = Mathf.Lerp(joint2, _maxLeftAngles[2], _timer);
-
-        _timer += _RobotMovementSpeedModifier * Time.deltaTime;
-    }
-
-    private void MoveArmBackwards()
-    {
-        float joint0 = _robotController.jointValues[0];
-        float joint1 = _robotController.jointValues[1];
-        float joint2 = _robotController.jointValues[2];
-
-        _robotController.jointValues[0] = Mathf.Lerp(joint0, _maxReverseAngles[0], _timer);
-        _robotController.jointValues[1] = Mathf.Lerp(joint1, _maxReverseAngles[1], _timer);
-        _robotController.jointValues[2] = Mathf.Lerp(joint2, _maxReverseAngles[2], _timer);
-
-        _timer += _RobotMovementSpeedModifier * Time.deltaTime;
-    }
-
-    private void MoveArmUpdwards()
-    {
-        float joint1 = _robotController.jointValues[1];
-        float joint2 = _robotController.jointValues[2];
-        //float joint3 = _robotController.jointValues[3];
-
-        _robotController.jointValues[1] = Mathf.Lerp(joint1, _maxUpwardAngle, _timer);
-        _robotController.jointValues[2] = Mathf.Lerp(joint2, _maxUpwardAngle, _timer);
-        //_robotController.jointValues[3] = Mathf.Lerp(joint3, _maxUpwardAngle, _timer);
-
-        _timer += _RobotMovementSpeedModifier * Time.deltaTime;
-    }
-
-    private void MoveArmDownWards()
-    {
-        float joint1 = _robotController.jointValues[1];
-        float joint2 = _robotController.jointValues[2];
-       // float joint3 = _robotController.jointValues[3];
-
-        _robotController.jointValues[1] = Mathf.Lerp(joint1, _maxDownwardAngles[0], _timer);
-        _robotController.jointValues[2] = Mathf.Lerp(joint2, _maxDownwardAngles[1], _timer);
-        //_robotController.jointValues[3] = Mathf.Lerp(joint3, _maxDownwardAngles[2], _timer);
-
-        _timer += _RobotMovementSpeedModifier * Time.deltaTime;
-    }
-
-    private void MoveArmForward()
-    {
-        float joint0 = _robotController.jointValues[0];
-        float joint1 = _robotController.jointValues[1];
-        float joint2 = _robotController.jointValues[2];
-
-        _robotController.jointValues[0] = Mathf.Lerp(joint0, _maxForwardAngles[0], _timer);
-        _robotController.jointValues[1] = Mathf.Lerp(joint1, _maxForwardAngles[1], _timer);
-        _robotController.jointValues[2] = Mathf.Lerp(joint2, _maxForwardAngles[2], _timer);
-
-        _timer += _RobotMovementSpeedModifier * Time.deltaTime;
-    }
 
     public void OnHoldStarted(HoldEventData eventData)
     {
@@ -226,8 +147,6 @@ public class TerminalInputManager : MonoBehaviour, IHoldHandler
         ReverseButtonIsPressed = false;
         LeftButtonIsPressed = false;
         RightButtonIsPressed = false;
-
-
     }
 
     public void OnHoldCanceled(HoldEventData eventData)
@@ -239,4 +158,19 @@ public class TerminalInputManager : MonoBehaviour, IHoldHandler
         LeftButtonIsPressed = false;
         RightButtonIsPressed = false;
     }
+
+    private void MoveArm(float[] desiredAngles, int firstJointIndex, int lastJointIndex)
+    {
+        int index = 0;
+        for (int jointIndex = firstJointIndex; jointIndex <= lastJointIndex; jointIndex++)
+        {
+            _robotController.jointValues[jointIndex] = Mathf.Lerp(_robotController.jointValues[jointIndex], desiredAngles[index], _timer);
+            
+            index++;
+        }
+        _timer += _RobotMovementSpeedModifier * Time.deltaTime;
+
+    }
+
+
 }

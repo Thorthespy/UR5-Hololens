@@ -964,7 +964,7 @@ MonoBehaviour:
   RobotBase: {fileID: 1375408501}
   jointValues:
   - 0
-  - 90
+  - 0
   - 160
   - 180
   - 0

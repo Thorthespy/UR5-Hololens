@@ -19,7 +19,7 @@ public class TerminalInputManager : MonoBehaviour, IHoldHandler
     [SerializeField]
     private float[] _maxLeftAngles = { 90.0f, -90.0f, 0.0f };
     [SerializeField]
-    public float[] _maxRightAngles = { 90.0f, 90.0f, 0.0f };   
+    private float[] _maxRightAngles = { 90.0f, 90.0f, 0.0f };   
 	
     private bool _upButtonIsPressed = false;
     private bool _downButtonIsPressed = false;
@@ -31,9 +31,10 @@ public class TerminalInputManager : MonoBehaviour, IHoldHandler
 	private TerminalButton[] _terminalButtons;
     private UR5Controller _robotController;
 	private float _timer = 0.0f;
+    private SliderUIManager _slideruIManager;
 
-    //private joint id
-   //private zielwinkel
+    private float _jointSliderAngle;
+    private int _jointSliderJointIndex;
 
     public bool UpButtonIsPressed {
         get {
@@ -106,12 +107,24 @@ public class TerminalInputManager : MonoBehaviour, IHoldHandler
         }
     }
 
+    internal void SetJointSliderButtonInformation(int jointIndex, float aimedAngle)
+    {
+        _jointSliderJointIndex = jointIndex;
+        _jointSliderAngle = aimedAngle;
+    }
+
+
     // Use this for initialization
     void Start () {
         _terminalButtons = GetComponentsInChildren<TerminalButton>();
         _robotController = FindObjectOfType<UR5Controller>();
         NotifyChildren();
         InputManager.Instance.PushFallbackInputHandler(gameObject);
+        _slideruIManager = FindObjectOfType<SliderUIManager>();
+        for(int i=0; i<_robotController.jointValues.Length; i++)
+        {
+            _slideruIManager.SetValue(i, _robotController.jointValues[i]);
+        }
     }
 
     private void NotifyChildren()
@@ -150,7 +163,7 @@ public class TerminalInputManager : MonoBehaviour, IHoldHandler
         }
         else if (JointSliderButtonIsPressed)
         {
-            //MoveArm(...)
+            MoveArm(_jointSliderAngle, _jointSliderJointIndex);
             // Wir brauchen folgendes:
             // Welcher Joint?
             // Welcher Winkel max/min?
@@ -188,80 +201,23 @@ public class TerminalInputManager : MonoBehaviour, IHoldHandler
         RightButtonIsPressed = false;
     }
 
-    private void MoveArm(float[] desiredAngles, int firstJointIndex, int lastJointIndex)
+    private void MoveArm(float[] aimedAngles, int firstJointIndex, int lastJointIndex)
     {
-        Debug.Log("Aktueller Winkel" + _robotController.jointValues[0]);
-        Debug.Log("Kürzester Rot" + CalcShortestRot(_robotController.jointValues[0], desiredAngles[0]));
         int index = 0;
         for (int jointIndex = firstJointIndex; jointIndex <= lastJointIndex; jointIndex++)
         {
-            _robotController.jointValues[jointIndex] = Mathf.LerpAngle(_robotController.jointValues[jointIndex], desiredAngles[jointIndex], _timer); 
-            index++;
-            
-            
+            _robotController.jointValues[jointIndex] = Mathf.LerpAngle(_robotController.jointValues[jointIndex], aimedAngles[index], _timer);
+            _slideruIManager.SetValue(jointIndex, _robotController.jointValues[jointIndex]);
+            index++;           
         }
         _timer += _RobotMovementSpeedModifier * Time.deltaTime;
-
     }
 
-    // If the return value is positive, then rotate to the left. Else,
-    // rotate to the right.
-    float CalcShortestRot(float from, float to)
+    private void MoveArm(float aimedAngle, int jointIndex)
     {
-        // If from or to is a negative, we have to recalculate them.
-        // For an example, if from = -45 then from(-45) + 360 = 315.
-        if (from < 0)
-        {
-            from += 360;
-        }
-
-        if (to < 0)
-        {
-            to += 360;
-        }
-
-        // Do not rotate if from == to.
-        if (from == to ||
-           from == 0 && to == 360 ||
-           from == 360 && to == 0)
-        {
-            return 0;
-        }
-
-        // Pre-calculate left and right.
-        float left = (360 - from) + to;
-        float right = from - to;
-        // If from < to, re-calculate left and right.
-        if (from < to)
-        {
-            if (to > 0)
-            {
-                left = to - from;
-                right = (360 - to) + from;
-            }
-            else
-            {
-                left = (360 - to) + from;
-                right = to - from;
-            }
-        }
-
-        // Determine the shortest direction.
-        return ((left <= right) ? left : (right * -1));
+        _robotController.jointValues[jointIndex] = Mathf.Lerp(_robotController.jointValues[jointIndex], aimedAngle, _timer);
+        _slideruIManager.SetValue(jointIndex, _robotController.jointValues[jointIndex]);
+        _timer += _RobotMovementSpeedModifier * Time.deltaTime;
     }
-
-    // Call CalcShortestRot and check its return value.
-    // If CalcShortestRot returns a positive value, then this function
-    // will return true for left. Else, false for right.
-    bool CalcShortestRotDirection(float from, float to)
-    {
-        // If the value is positive, return true (left).
-        if (CalcShortestRot(from, to) >= 0)
-        {
-            return true;
-        }
-        return false; // right
-    }
-
 
 }

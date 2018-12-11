@@ -1,10 +1,11 @@
 ﻿using HoloToolkit.Unity.InputModule;
+using UnityEngine.XR.WSA.Input;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TerminalInputManager : MonoBehaviour, IHoldHandler
+public class TerminalInputManager : MonoBehaviour, IHoldHandler, IInputHandler
 {
     [SerializeField]
     private float _RobotMovementSpeedModifier = 0.25f;
@@ -164,10 +165,6 @@ public class TerminalInputManager : MonoBehaviour, IHoldHandler
         else if (JointSliderButtonIsPressed)
         {
             MoveArm(_jointSliderAngle, _jointSliderJointIndex);
-            // Wir brauchen folgendes:
-            // Welcher Joint?
-            // Welcher Winkel max/min?
-            // 
         }
         else
         {
@@ -183,15 +180,10 @@ public class TerminalInputManager : MonoBehaviour, IHoldHandler
 
     public void OnHoldCompleted(HoldEventData eventData)
     {
-        DownButtonIsPressed = false;
-        UpButtonIsPressed = false;
-        ForwardButtonIsPressed = false;
-        ReverseButtonIsPressed = false;
-        LeftButtonIsPressed = false;
-        RightButtonIsPressed = false;
+        DeactivateAllButtons();
     }
 
-    public void OnHoldCanceled(HoldEventData eventData)
+    private void DeactivateAllButtons()
     {
         DownButtonIsPressed = false;
         UpButtonIsPressed = false;
@@ -199,6 +191,12 @@ public class TerminalInputManager : MonoBehaviour, IHoldHandler
         ReverseButtonIsPressed = false;
         LeftButtonIsPressed = false;
         RightButtonIsPressed = false;
+        JointSliderButtonIsPressed = false;
+    }
+
+    public void OnHoldCanceled(HoldEventData eventData)
+    {
+        DeactivateAllButtons();
     }
 
     private void MoveArm(float[] aimedAngles, int firstJointIndex, int lastJointIndex)
@@ -220,4 +218,13 @@ public class TerminalInputManager : MonoBehaviour, IHoldHandler
         _timer += _RobotMovementSpeedModifier * Time.deltaTime;
     }
 
+    public void OnInputDown(InputEventData eventData)
+    {
+        //throw new NotImplementedException();
+    }
+
+    public void OnInputUp(InputEventData eventData)
+    {
+        DeactivateAllButtons();
+    }
 }

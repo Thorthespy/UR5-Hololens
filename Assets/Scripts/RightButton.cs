@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using HoloToolkit.Unity.InputModule;
 using UnityEngine;
@@ -19,7 +20,6 @@ public class RightButton : TerminalButton {
 
     public override void OnInputClicked(InputClickedEventData eventData)
     {
-
         eventData.Use();
     }
 

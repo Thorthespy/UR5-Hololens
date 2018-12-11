@@ -42,10 +42,6 @@ public abstract class AbstractButton : MonoBehaviour, IFocusable, IInputClickHan
     public abstract void OnInputUp(InputEventData eventData);
 
     public abstract void OnInputClicked(InputClickedEventData eventData);
-    //{
-        //OnButtonClicked(eventData);
-    //}
 
-    //public abstract void OnButtonClicked(InputClickedEventData eventData);
 
 }

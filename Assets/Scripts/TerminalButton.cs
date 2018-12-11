@@ -18,8 +18,6 @@ public abstract class TerminalButton : AbstractButton {
 		
 	}
 
- 
-
     public void AssignTerminalInputManager(TerminalInputManager tim)
     {
         _terminalInputManager = tim;

@@ -29,10 +29,11 @@ public class TerminalInputManager : MonoBehaviour, IHoldHandler, IInputHandler
     private bool _leftButtonIsPressed = false;
     private bool _rightButtonIsPressed = false;
     private bool _jointSliderButtonIsPressed = false;
-	private TerminalButton[] _terminalButtons;
+    private TerminalButton[] _terminalButtons;
     private UR5Controller _robotController;
 	private float _timer = 0.0f;
     private SliderUIManager _slideruIManager;
+    private TerminalProgramManager _terminalProgramManager;
 
     private float _jointSliderAngle;
     private int _jointSliderJointIndex;
@@ -108,6 +109,12 @@ public class TerminalInputManager : MonoBehaviour, IHoldHandler, IInputHandler
         }
     }
 
+    public UR5Controller RobotController {
+        get {
+            return _robotController;
+        }
+    }
+
     internal void SetJointSliderButtonInformation(int jointIndex, float aimedAngle)
     {
         _jointSliderJointIndex = jointIndex;
@@ -122,9 +129,10 @@ public class TerminalInputManager : MonoBehaviour, IHoldHandler, IInputHandler
         NotifyChildren();
         InputManager.Instance.PushFallbackInputHandler(gameObject);
         _slideruIManager = FindObjectOfType<SliderUIManager>();
-        for(int i=0; i<_robotController.jointValues.Length; i++)
+        _terminalProgramManager = GetComponent<TerminalProgramManager>();
+        for(int i=0; i<RobotController.jointValues.Length; i++)
         {
-            _slideruIManager.SetValue(i, _robotController.jointValues[i]);
+            _slideruIManager.SetValue(i, RobotController.jointValues[i]);
         }
     }
 
@@ -138,7 +146,10 @@ public class TerminalInputManager : MonoBehaviour, IHoldHandler, IInputHandler
 	
 	// Update is called once per frame
 	void Update () {
-		if(UpButtonIsPressed)
+        if (_terminalProgramManager.ProgramIsPlaying)
+            return;
+
+        if (UpButtonIsPressed)
         {
             MoveArm(_maxUpwardAngle, 1, 2);
         }
@@ -168,10 +179,25 @@ public class TerminalInputManager : MonoBehaviour, IHoldHandler, IInputHandler
         }
         else
         {
-            _timer = 0.0f;
+            ResetTimer();
         }
 
 	}
+
+    public void PlayProgramm()
+    {
+        _terminalProgramManager.PlayProgram();
+    }
+
+    public void AddWaypoint()
+    {
+        _terminalProgramManager.AddWaypoint();
+    }
+
+    public void RemoveWaypoint()
+    {
+        _terminalProgramManager.RemoveAllWaypoints();
+    }
 
     public void OnHoldStarted(HoldEventData eventData)
     {
@@ -204,8 +230,8 @@ public class TerminalInputManager : MonoBehaviour, IHoldHandler, IInputHandler
         int index = 0;
         for (int jointIndex = firstJointIndex; jointIndex <= lastJointIndex; jointIndex++)
         {
-            _robotController.jointValues[jointIndex] = Mathf.LerpAngle(_robotController.jointValues[jointIndex], aimedAngles[index], _timer);
-            _slideruIManager.SetValue(jointIndex, _robotController.jointValues[jointIndex]);
+            RobotController.jointValues[jointIndex] = Mathf.LerpAngle(RobotController.jointValues[jointIndex], aimedAngles[index], _timer);
+            _slideruIManager.SetValue(jointIndex, RobotController.jointValues[jointIndex]);
             index++;           
         }
         _timer += _RobotMovementSpeedModifier * Time.deltaTime;
@@ -213,14 +239,30 @@ public class TerminalInputManager : MonoBehaviour, IHoldHandler, IInputHandler
 
     private void MoveArm(float aimedAngle, int jointIndex)
     {
-        _robotController.jointValues[jointIndex] = Mathf.Lerp(_robotController.jointValues[jointIndex], aimedAngle, _timer);
-        _slideruIManager.SetValue(jointIndex, _robotController.jointValues[jointIndex]);
+        RobotController.jointValues[jointIndex] = Mathf.Lerp(RobotController.jointValues[jointIndex], aimedAngle, _timer);
+        _slideruIManager.SetValue(jointIndex, RobotController.jointValues[jointIndex]);
         _timer += _RobotMovementSpeedModifier * Time.deltaTime;
     }
 
+    internal void MoveArm(float[] jointAngles)
+    {
+        for (int jointIndex = 0; jointIndex < jointAngles.Length; jointIndex++)
+        {
+            RobotController.jointValues[jointIndex] = Mathf.LerpAngle(RobotController.jointValues[jointIndex], jointAngles[jointIndex], _timer);
+            _slideruIManager.SetValue(jointIndex, RobotController.jointValues[jointIndex]);
+        }
+        _timer += _RobotMovementSpeedModifier * Time.deltaTime;
+    }
+
+    public void ResetTimer()
+    {
+        _timer = 0.0f;
+    }
+
+
     public void OnInputDown(InputEventData eventData)
     {
-        //throw new NotImplementedException();
+
     }
 
     public void OnInputUp(InputEventData eventData)

@@ -4,6 +4,7 @@ using HoloToolkit.Unity.InputModule;
 using UnityEngine;
 using UnityEngine.Experimental.UIElements;
 
+//The sliders buttons will have a direction and an index to identify which button is actually pressed.
 public class JointSliderButton : TerminalButton {
 
     public Slider _slider;
@@ -15,6 +16,7 @@ public class JointSliderButton : TerminalButton {
     private float _maxValue = 180.0f;
     private float _aimedAngle;
 
+    //defines if a button is Left or right to indetify in which direction the joint has to move.
     private enum Direction { LEFT, RIGHT};
 
     public override void OnInputClicked(InputClickedEventData eventData)
@@ -36,11 +38,6 @@ public class JointSliderButton : TerminalButton {
     {
         _image.color = _focusColor;      
         _terminalInputManager.JointSliderButtonIsPressed = false;
-        //terminal input manager button is pressed
-        //terminal input manager set id
-        //terminal input manager set direction
-
-        // => Ein Tolles Object und nur das Object aber da steigt bestimmt niemand durch z.B. termoinal set new ButtonIfnormation(id, direction);
         eventData.Use();
     }
 

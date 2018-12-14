@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+//This class controls the triangles from the sliders, so that the correct value can be set.
 public class SliderUIManager : MonoBehaviour {
 
     [SerializeField]
@@ -23,6 +24,5 @@ public class SliderUIManager : MonoBehaviour {
     public void SetValue(int sliderID, float value)
     {
         _sliders[sliderID].value = value;
-        //_inputFields[sliderID].GetComponentInChildren<Text>().text = value + "";
     }
 }

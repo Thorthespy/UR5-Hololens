@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using HoloToolkit.Unity.InputModule;
 
+//Base Class for all Terminal Buttons.
 public abstract class TerminalButton : AbstractButton {
 
     protected TerminalInputManager _terminalInputManager;

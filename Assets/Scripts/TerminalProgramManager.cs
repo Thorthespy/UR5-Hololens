@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+//The program manager controls all the programs and is able to read them. 
 public class TerminalProgramManager : MonoBehaviour {
 
     private Program _program;
@@ -23,12 +24,13 @@ public class TerminalProgramManager : MonoBehaviour {
         }
     }
 
-
     void Start () {
         _program = new Program();
         _terminalInputManager = FindObjectOfType<TerminalInputManager>();
 	}
 	
+    //If a program is playing, check if the Joints are in the correct positions. If they are, reset the timer from the manager and
+    //head over to the next waypoint. If this was the last waypoint, stop the program. 
 	void Update () {
         if (ProgramIsPlaying)
         {
@@ -52,6 +54,7 @@ public class TerminalProgramManager : MonoBehaviour {
  
     }
 
+    //Check if the Joints are in the desired angles.
     private bool ArmInCorrecctPosition(float[] aimedAngles, float[] actualAngles)
     {
         for(int index = 0; index < aimedAngles.Length; index++)
@@ -76,6 +79,7 @@ public class TerminalProgramManager : MonoBehaviour {
         _programs.Add(program);
     }*/
 
+    //Add a waypoint to the program with the actual angles.
     public void AddWaypoint()
     {
         WayPoint wayPoint = new WayPoint(_terminalInputManager.RobotController.jointValues);
@@ -87,6 +91,7 @@ public class TerminalProgramManager : MonoBehaviour {
     {
         _program.RemoveWaypoint();
     } */
+
 
     public void RemoveAllWaypoints()
     {

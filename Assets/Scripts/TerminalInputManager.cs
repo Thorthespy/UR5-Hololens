@@ -5,8 +5,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+//The Terminal Input Manager handles all the input from the user if he interacts with the terminal UI.
 public class TerminalInputManager : MonoBehaviour, IHoldHandler, IInputHandler
 {
+    //All the angles for the UR5 Joints.
     [SerializeField]
     private float _RobotMovementSpeedModifier = 0.25f;
     [SerializeField]
@@ -115,6 +117,7 @@ public class TerminalInputManager : MonoBehaviour, IHoldHandler, IInputHandler
         }
     }
 
+    //This functions sets the joint we are currently moving (for controlling a single joint).
     internal void SetJointSliderButtonInformation(int jointIndex, float aimedAngle)
     {
         _jointSliderJointIndex = jointIndex;
@@ -122,7 +125,7 @@ public class TerminalInputManager : MonoBehaviour, IHoldHandler, IInputHandler
     }
 
 
-    // Use this for initialization
+    //Set Up: Search for important Objects, Notify all Buttons and assign them this gameobject.
     void Start () {
         _terminalButtons = GetComponentsInChildren<TerminalButton>();
         _robotController = FindObjectOfType<UR5Controller>();
@@ -136,6 +139,7 @@ public class TerminalInputManager : MonoBehaviour, IHoldHandler, IInputHandler
         }
     }
 
+    //Set the TerminalInputManager to all buttons.
     private void NotifyChildren()
     {
         foreach (TerminalButton Tb in _terminalButtons)
@@ -144,7 +148,7 @@ public class TerminalInputManager : MonoBehaviour, IHoldHandler, IInputHandler
         }
     }
 	
-	// Update is called once per frame
+	//Handle the Right Button. If a programm is playing, the buttons will do nothing.
 	void Update () {
         if (_terminalProgramManager.ProgramIsPlaying)
             return;
@@ -225,6 +229,8 @@ public class TerminalInputManager : MonoBehaviour, IHoldHandler, IInputHandler
         DeactivateAllButtons();
     }
 
+    //Moves the arm to the desired position: Go through all joints in the robot and lerp from the actual to the desired angle modified
+    //by the robot speed. Set the correct value to the correct slider. This function is for moving more than 1 angle at the time.
     private void MoveArm(float[] aimedAngles, int firstJointIndex, int lastJointIndex)
     {
         int index = 0;
@@ -237,6 +243,7 @@ public class TerminalInputManager : MonoBehaviour, IHoldHandler, IInputHandler
         _timer += _RobotMovementSpeedModifier * Time.deltaTime;
     }
 
+    //Moves the arm the function function before, but this time only for one angle.
     private void MoveArm(float aimedAngle, int jointIndex)
     {
         RobotController.jointValues[jointIndex] = Mathf.Lerp(RobotController.jointValues[jointIndex], aimedAngle, _timer);
@@ -244,6 +251,7 @@ public class TerminalInputManager : MonoBehaviour, IHoldHandler, IInputHandler
         _timer += _RobotMovementSpeedModifier * Time.deltaTime;
     }
 
+    //Moves the arm like the function before, but this time for all angles.
     internal void MoveArm(float[] jointAngles)
     {
         for (int jointIndex = 0; jointIndex < jointAngles.Length; jointIndex++)

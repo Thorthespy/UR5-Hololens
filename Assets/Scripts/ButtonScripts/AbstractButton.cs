@@ -4,9 +4,9 @@ using UnityEngine;
 using UnityEngine.UI;
 using HoloToolkit.Unity.InputModule;
 
+//This class extends from different InputHandlers. It is for all buttons in the future for the project.
 public abstract class AbstractButton : MonoBehaviour, IFocusable, IInputClickHandler, IInputHandler
 {
-
     protected Image _image;
     public Color _focusColor;
     public Color _pressedColor;
@@ -27,20 +27,25 @@ public abstract class AbstractButton : MonoBehaviour, IFocusable, IInputClickHan
 
     }
 
+    //If the player looks with the cursor on the object, the color will change to the focus color.
     public void OnFocusEnter()
     {
         _image.color = _focusColor;
     }
     
+    //If the player looks away, the button will change to it's original color.
     public void OnFocusExit()
     {
         _image.color = _originalColor; 
     }
-
+    
+    //This function will be executed if the player clicks and holds a button.
     public abstract void OnInputDown(InputEventData eventData);
 
+    //This function will be executed if the player releases a button.
     public abstract void OnInputUp(InputEventData eventData);
 
+    //This function will be executed if the player just clicks one time on the button.
     public abstract void OnInputClicked(InputClickedEventData eventData);
 
 
